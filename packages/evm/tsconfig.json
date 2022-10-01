@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "target": "es6",
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+  },
+  "include": ["./tasks", "./test", "./typechain-types", "./config"],
+  "files": ["./hardhat.config.ts"]
+}
