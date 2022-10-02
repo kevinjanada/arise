@@ -30,7 +30,8 @@ When users cash out their Arise Token, the tokens are burnt, and an equal amount
   - [ ] Run local EVM (Later this will be Polygon)
   - [ ] Deploy wormhole contract
   - [ ] Run a wormhole Guardian
-  - [ ] Register new Token (TestUSDC) to Token Bridge Contract -> https://book.wormhole.com/technical/evm/tokenLayer.html#registering-new-tokens
+  - [ ] Register new Token (TestUSDC) to Token Bridge Contract -> https://book.wormhole.com/technical/typescript/attestingToken.html
+    > On localnet, attesting token is done in 2 steps 1st on source chain and 2nd on target chain
     > Later on we may not need to do this. USDC is probably already registered to wormhole 
   - [ ] Do basic transfer -> https://book.wormhole.com/technical/evm/tokenLayer.html#basic-transfer
 - [ ] Mint Arise token on Arise Chain
@@ -56,3 +57,8 @@ e.g Ethereum's
 
 ### Local Wormhole Validator
 https://github.com/wormhole-foundation/xdapp-book/tree/main/projects/wormhole-local-validator
+
+### EVMOS
+run `./init.sh`
+if you want to change the rpc port change it in `~/.evmos/config/genesis.json`
+Then run `evmosd start`

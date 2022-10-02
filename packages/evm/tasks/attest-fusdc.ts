@@ -9,10 +9,8 @@ import { getEmitterAddressEth, parseSequenceFromLogEth, tryNativeToHexString } f
 * */
 
 
-task("bridge-fusdc", "Deploy FUSDC")
-  .addParam("amount")
-  .addOptionalParam("to")
-  .setAction(async ({ amount, to }, { ethers, artifacts }) => {
+task("attest-fusdc", "Deploy FUSDC")
+  .setAction(async (_, { ethers, artifacts }) => {
     const { chainId } = await ethers.provider.getNetwork();
     const [deployer] = await ethers.getSigners();
 
@@ -21,60 +19,28 @@ task("bridge-fusdc", "Deploy FUSDC")
     const coreBridgeAddress = "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550";
     const tokenBridgeAddress = "0x0290FB167208Af455bB137780163b7B7a9a10C16";
 
-    const { abi } = await artifacts.readArtifact("FakeUSDC");
-    const FUSDC = new ethers.Contract(
-      addresses["FUSDC"][chainId],
-      abi,
-      deployer,
-    ) as FakeUSDC;
-
-    const decimals = await FUSDC.decimals();
-    const bridgeAmt = ethers.utils.parseUnits(amount, decimals);
-
-    let tx = await FUSDC.approve(
-      tokenBridgeAddress,
-      bridgeAmt,
-    )
-    await tx.wait();
-
-    const recipient = to ? to : deployer.address
-
     const tokenBridge = new ethers.Contract(
       tokenBridgeAddress,
       Bridge.abi,
       deployer,
     );
 
-    const senderChainId = 2;
-    const recipientChainId = 4;
-    // const recipientAddrBytes = ethers.utils.zeroPad(ethers.utils.arrayify(recipient), 32);
-    const recipientAddrBytes = Buffer.from(tryNativeToHexString(recipient, "ethereum"), "hex");
-    console.log({ recipientAddrBytes });
-
     nonce = await ethers.provider.getTransactionCount(deployer.address);
-    tx = await tokenBridge.transferTokens(
+    const tx = await tokenBridge.attestToken(
       addresses["FUSDC"][chainId], // token address
-      bridgeAmt,
-      recipientChainId, // destination chain id 
-      recipientAddrBytes,
-      0,
       nonce,
-    )
-    let receipt = await tx.wait();
-
-    console.log("Transfer Tokens on its way");
-    // console.log(receipt);
+    );
+    const attestationReceipt = await tx.wait();
 
     const wormholeRestAddress = "http://localhost:7071";
 
     console.log("Fetching VAA from guardian");
 
+    const senderChainId = 2; // ethereum
+
     const emitterAddr = getEmitterAddressEth(tokenBridgeAddress);
-    console.log({ emitterAddr });
-    const seq = parseSequenceFromLogEth(receipt, coreBridgeAddress);
-    console.log({ seq });
+    const seq = parseSequenceFromLogEth(attestationReceipt, coreBridgeAddress);
     const vaaURL = `${wormholeRestAddress}/v1/signed_vaa/${senderChainId}/${emitterAddr}/${seq}`;
-    console.log({ vaaURL });
     let vaaBytes = await (await fetch(vaaURL)).json();
     while (!vaaBytes.vaaBytes) {
       console.log("VAA not found, retrying in 5s!");
@@ -82,8 +48,6 @@ task("bridge-fusdc", "Deploy FUSDC")
       vaaBytes = await (await fetch(vaaURL)).json();
     }
 
+    console.log("use this vaaBytes string as parameter to create-wrapped-fusdc")
     console.log(vaaBytes.vaaBytes);
-
-    vaaBytes = Buffer.from(vaaBytes.vaaBytes, "base64");
-    console.log({ vaaBytes });
 });

@@ -1,3 +1,6 @@
 [submodule "packages/wormhole"]
 	path = packages/wormhole
 	url = git@github.com:kevinjanada/wormhole.git
+[submodule "packages/evmos"]
+	path = packages/evmos
+	url = git@github.com:kevinjanada/evmos.git

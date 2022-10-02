@@ -37,10 +37,14 @@ import "./tasks";
 const privKey1 = "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "ganache",
+  defaultNetwork: "localEth",
   networks: {
-    ganache: {
+    localEth: {
       url: "http://localhost:8545",
+      accounts: [privKey1]
+    },
+    localBsc: {
+      url: "http://localhost:8546",
       accounts: [privKey1]
     }
   },
